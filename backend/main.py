@@ -1,3 +1,14 @@
+import os
+
+print("--- SERVER STARTING ---")
+db_url = os.getenv("DATABASE_URL", "NOT_SET")
+if db_url != "NOT_SET":
+    # Mask password for security but show structure
+    masked = db_url.split("@")[-1] if "@" in db_url else db_url
+    print(f"DATABASE_URL detected. Host/Path: {masked}")
+else:
+    print("WARNING: DATABASE_URL is NOT SET. Using SQLite.")
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -6,7 +17,6 @@ from websocket_manager import manager
 from routers import seats, admin, auth
 from routers.seats import release_stale_locks
 import models  # noqa
-import os
 
 
 @asynccontextmanager
