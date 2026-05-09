@@ -138,45 +138,51 @@ async def confirm_manual(
     base64_image = base64.b64encode(content).decode('utf-8')
     mime_type = screenshot.content_type or "image/png"
     screenshot_data = f"data:{mime_type};base64,{base64_image}"
-        
-    receipt_no = 1
-    async with db.begin():
-        # verify all seats
-        result = await db.execute(
-            select(Seat).where(Seat.id.in_(seat_id_list), Seat.locked_by == session_id)
-        )
-        seats_to_confirm = result.scalars().all()
-        
-        if len(seats_to_confirm) != len(seat_id_list):
-            raise HTTPException(status_code=404, detail="One or more seats not found or not locked by you")
-            
-        # Get next receipt number
-        res = await db.execute(select(func.max(Booking.receipt_no)))
-        max_no = res.scalar() or 0
-        receipt_no = max_no + 1
-
-        for seat in seats_to_confirm:
-            seat.status = "sold"
-            seat.transaction_id = "manual"
-            seat.locked_by = None
-            seat.locked_until = None
-            
-            booking = Booking(
-                seat_id=seat.id,
-                user_session=session_id,
-                customer_name=customer_name,
-                customer_phone=customer_phone,
-                screenshot_filename=screenshot_data,
-                amount=seat.price,
-                receipt_no=receipt_no
+    try:
+        receipt_no = 1
+        async with db.begin():
+            # verify all seats
+            result = await db.execute(
+                select(Seat).where(Seat.id.in_(seat_id_list), Seat.locked_by == session_id)
             )
-            db.add(booking)
+            seats_to_confirm = result.scalars().all()
             
-    for seat_id in seat_id_list:
-        seat_lock_cache.release(seat_id)
-        await manager.broadcast(
-            "seat_sold",
-            {"seat_id": seat_id, "session_id": session_id, "transaction_id": "manual"},
-        )
-        
-    return {"status": "sold", "seat_ids": seat_id_list, "receipt_no": receipt_no}
+            if len(seats_to_confirm) != len(seat_id_list):
+                raise HTTPException(status_code=404, detail="One or more seats not found or not locked by you")
+                
+            # Get next receipt number
+            res = await db.execute(select(func.max(Booking.receipt_no)))
+            max_no = res.scalar() or 0
+            receipt_no = max_no + 1
+
+            for seat in seats_to_confirm:
+                seat.status = "sold"
+                seat.transaction_id = "manual"
+                seat.locked_by = None
+                seat.locked_until = None
+                
+                booking = Booking(
+                    seat_id=seat.id,
+                    user_session=session_id,
+                    customer_name=customer_name,
+                    customer_phone=customer_phone,
+                    screenshot_filename=screenshot_data,
+                    amount=seat.price,
+                    receipt_no=receipt_no
+                )
+                db.add(booking)
+                
+        for seat_id in seat_id_list:
+            seat_lock_cache.release(seat_id)
+            await manager.broadcast(
+                "seat_sold",
+                {"seat_id": seat_id, "session_id": session_id, "transaction_id": "manual"},
+            )
+            
+        return {"status": "sold", "seat_ids": seat_id_list, "receipt_no": receipt_no}
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        error_msg = traceback.format_exc()
+        raise HTTPException(status_code=500, detail=error_msg)
