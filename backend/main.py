@@ -1,11 +1,11 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from backend.database import engine, Base
-from backend.websocket_manager import manager
-from backend.routers import seats, admin, auth
-from backend.routers.seats import release_stale_locks
-import backend.models as models  # noqa
+from database import engine, Base
+from websocket_manager import manager
+from routers import seats, admin, auth
+from routers.seats import release_stale_locks
+import models  # noqa
 import os
 
 
