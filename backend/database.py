@@ -21,10 +21,14 @@ elif DATABASE_URL.startswith("postgresql://") and "+asyncpg" not in DATABASE_URL
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-# SSL is required for most live cloud databases (like Neon/Render)
+# SSL is required for live cloud databases, but Render uses self-signed certs
+import ssl
 engine_args = {}
 if "sqlite" not in DATABASE_URL:
-    engine_args["connect_args"] = {"ssl": True}
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    engine_args["connect_args"] = {"ssl": ctx}
 
 engine = create_async_engine(DATABASE_URL, echo=False, **engine_args)
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
