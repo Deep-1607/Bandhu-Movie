@@ -377,3 +377,32 @@
   transition: all 0.2s;
 }
 .home-btn:hover { background: #e2e8f0; color: var(--text-color); }
+
+@media (max-width: 600px) {
+  .payment-page {
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  .payment-card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .payment-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .qr-card {
+    padding: 24px 12px;
+  }
+
+  .qr-image-wrap img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .booking-summary-mini {
+    padding: 16px 12px;
+  }
+}

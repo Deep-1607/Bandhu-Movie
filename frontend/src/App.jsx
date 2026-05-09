@@ -41,12 +41,6 @@ function Navbar() {
       <Link to="/" className="app-nav__brand">🎬 BandhuShow</Link>
 
       <div className="app-nav__center">
-        {selectedSeats.length > 0 && (
-          <div className="app-nav__seat-count">
-            <span className="seat-count-dot" />
-            {selectedSeats.length}/{MAX_SEATS} seats selected
-          </div>
-        )}
       </div>
 
       <div className="app-nav__links">
