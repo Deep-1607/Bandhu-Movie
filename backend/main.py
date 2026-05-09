@@ -15,6 +15,13 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         print("Database connected and tables created!")
+        
+        # Auto-seed if database is empty
+        try:
+            from seed import seed_initial_data
+        except ImportError:
+            from backend.seed import seed_initial_data
+        await seed_initial_data()
     except Exception as e:
         print(f"DATABASE ERROR ON STARTUP: {e}")
     # Release any seats stuck in 'locked' from a previous server run

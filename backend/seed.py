@@ -90,6 +90,25 @@ def build_seats():
     return seats
 
 
+async def seed_initial_data():
+    async with AsyncSessionLocal() as db:
+        from sqlalchemy import func
+        from sqlalchemy.future import select
+        
+        # Check if seats already exist
+        result = await db.execute(select(func.count(Seat.id)))
+        count = result.scalar()
+        
+        if count == 0:
+            print("Database is empty. Seeding initial seats...")
+            seats = build_seats()
+            db.add_all(seats)
+            await db.commit()
+            print(f"[OK] Seeded {len(seats)} seats successfully.")
+        else:
+            print(f"Database already has {count} seats. Skipping auto-seed.")
+
+
 async def seed():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
