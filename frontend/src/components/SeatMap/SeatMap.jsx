@@ -66,14 +66,17 @@ export default function SeatMap() {
         ))}
       </div>
 
-      {/* Sections */}
-      <Section title="Upper Sofa" price={150} rows={upperRows} hasAisle={false} showLabel={true} />
-      <Section title="Platinum"   price={100} rows={sortedPlatRows} hasAisle={true} />
-      <Section title="Lounger"    price={150} rows={loungerRows} hasAisle={true} />
+      {/* Map Content */}
+      <div className="seatmap__inner">
+        {/* Sections */}
+        <Section title="Upper Sofa" price={150} rows={upperRows} hasAisle={false} showLabel={true} />
+        <Section title="Platinum"   price={100} rows={sortedPlatRows} hasAisle={true} />
+        <Section title="Lounger"    price={150} rows={loungerRows} hasAisle={true} />
 
-      {/* Screen */}
-      <div className="screen-wrap">
-        <div className="screen" aria-label="Screen">SCREEN</div>
+        {/* Screen */}
+        <div className="screen-wrap">
+          <div className="screen" aria-label="Screen">SCREEN</div>
+        </div>
       </div>
     </div>
   );

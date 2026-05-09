@@ -17,6 +17,12 @@
   margin-bottom: 32px;
 }
 
+.seatmap__inner {
+  min-width: max-content;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
 .legend-item {
   display: flex;
   align-items: center;
