@@ -111,7 +111,7 @@ async def get_all_seats_admin(
             "receipt_no": booking.receipt_no if booking else None,
             "customer_name": booking.customer_name if booking else None,
             "customer_phone": booking.customer_phone if booking else None,
-            "screenshot": f"/uploads/{booking.screenshot_filename}" if booking and booking.screenshot_filename else None,
+            "screenshot": booking.screenshot_filename if booking else None,
             "booked_at": booking.created_at.isoformat() if booking else None
         })
     return output
