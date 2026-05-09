@@ -21,6 +21,7 @@ import models  # noqa
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print("--- LIFESPAN STARTING ---")
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -30,13 +31,26 @@ async def lifespan(app: FastAPI):
         try:
             from seed import seed_initial_data
         except ImportError:
-            from backend.seed import seed_initial_data
-        await seed_initial_data()
+            try:
+                from backend.seed import seed_initial_data
+            except ImportError:
+                print("Could not find seed script, skipping...")
+                seed_initial_data = None
+        
+        if seed_initial_data:
+            await seed_initial_data()
     except Exception as e:
-        print(f"DATABASE ERROR ON STARTUP: {e}")
-    # Release any seats stuck in 'locked' from a previous server run
-    await release_stale_locks()
+        print(f"!!! NON-FATAL DATABASE ERROR ON STARTUP !!!: {e}")
+        print("Continuing anyway to keep server alive...")
+    
+    try:
+        # Release any seats stuck in 'locked' from a previous server run
+        await release_stale_locks()
+    except Exception as e:
+        print(f"Stale lock release failed (ignoring): {e}")
+    
     yield
+    print("--- LIFESPAN ENDING ---")
 
 
 app = FastAPI(title="BandhuShow API", version="1.0.0", lifespan=lifespan)
