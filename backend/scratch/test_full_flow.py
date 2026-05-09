@@ -1,7 +1,7 @@
 import urllib.request, urllib.error, json
 
-session_id = 'test_session_9999'
-seat_id = 'PLT-B-02'
+session_id = 'test_session_555'
+seat_id = 'PLT-B-03'
 
 try:
     print("Locking seat...")
