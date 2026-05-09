@@ -132,14 +132,12 @@ async def confirm_manual(
     if not seat_id_list:
         raise HTTPException(status_code=400, detail="No seats selected")
         
-    # Save the file
-    ext = os.path.splitext(screenshot.filename)[1] if screenshot.filename else ".png"
-    unique_filename = f"{uuid.uuid4().hex}{ext}"
-    os.makedirs("uploads", exist_ok=True)
-    filepath = os.path.join("uploads", unique_filename)
-    async with aiofiles.open(filepath, 'wb') as out_file:
-        content = await screenshot.read()
-        await out_file.write(content)
+    # Convert to Base64 for permanent storage in DB
+    import base64
+    content = await screenshot.read()
+    base64_image = base64.b64encode(content).decode('utf-8')
+    mime_type = screenshot.content_type or "image/png"
+    screenshot_data = f"data:{mime_type};base64,{base64_image}"
         
     receipt_no = 1
     async with db.begin():
@@ -168,7 +166,7 @@ async def confirm_manual(
                 user_session=session_id,
                 customer_name=customer_name,
                 customer_phone=customer_phone,
-                screenshot_filename=unique_filename,
+                screenshot_filename=screenshot_data,
                 amount=seat.price,
                 receipt_no=receipt_no
             )

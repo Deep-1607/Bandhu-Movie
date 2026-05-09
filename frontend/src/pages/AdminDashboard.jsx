@@ -105,7 +105,7 @@ export default function AdminDashboard() {
                 <div className="customer-phone">📞 {seat.customer_phone}</div>
                 {seat.screenshot && (
                   <a 
-                    href={`${BASE_URL}${seat.screenshot}`} 
+                    href={seat.screenshot.startsWith('data:') ? seat.screenshot : `${BASE_URL}${seat.screenshot}`} 
                     target="_blank" 
                     rel="noreferrer"
                     className="view-proof"
