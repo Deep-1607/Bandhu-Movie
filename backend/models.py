@@ -27,7 +27,7 @@ class Seat(Base):
 
 
 class Booking(Base):
-    __tablename__ = "bookings"
+    __tablename__ = "bookings_v2"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     seat_id = Column(String, ForeignKey("seats.id"))
