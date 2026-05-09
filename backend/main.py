@@ -11,8 +11,12 @@ import os
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("Database connected and tables created!")
+    except Exception as e:
+        print(f"DATABASE ERROR ON STARTUP: {e}")
     # Release any seats stuck in 'locked' from a previous server run
     await release_stale_locks()
     yield
