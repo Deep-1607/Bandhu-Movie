@@ -5,6 +5,7 @@ import useStore from '../store/useStore';
 import './LoginPage.css'; // Reuse login styles
 
 import { API_URL as API } from '../api';
+import { IconMovie, IconSparkles } from '../components/Icons';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -33,7 +34,9 @@ export default function RegisterPage() {
     <div className="login-page">
       <div className="login-card">
         <header className="login-header">
-          <div className="login-logo">🎬</div>
+          <div className="login-logo">
+            <IconMovie size={40} className="login-logo__svg" />
+          </div>
           <h1>BandhuShow</h1>
           <p>Create your account to start booking</p>
         </header>
@@ -73,7 +76,12 @@ export default function RegisterPage() {
           </div>
 
           <button className={`login-btn ${loading ? 'loading' : ''}`} disabled={loading}>
-            {loading ? 'Creating Account...' : '✨ Register Now'}
+            {loading ? 'Creating Account...' : (
+              <>
+                <IconSparkles size={20} />
+                <span>Register Now</span>
+              </>
+            )}
           </button>
         </form>
 

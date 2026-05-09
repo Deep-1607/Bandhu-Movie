@@ -5,6 +5,7 @@ import useStore from '../store/useStore';
 import './LoginPage.css';
 
 import { API_URL as API } from '../api';
+import { IconMovie, IconUser, IconLock, IconTicket } from '../components/Icons';
 
 export default function LoginPage() {
   const { login, showToast } = useStore();
@@ -38,7 +39,7 @@ export default function LoginPage() {
       <div className="login-card">
         <header className="login-header">
           <div className="login-logo">
-            <span className="login-logo__icon">🎬</span>
+            <IconMovie size={32} className="login-logo__svg" />
             <span className="login-logo__text">BandhuShow</span>
           </div>
           <h1>Welcome Back!</h1>
@@ -47,9 +48,9 @@ export default function LoginPage() {
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="field">
-            <label className="field__label">Username</label>
+            <label className="field__label">USERNAME</label>
             <div className="field__wrap">
-              <span className="field__icon">👤</span>
+              <span className="field__icon"><IconUser size={18} /></span>
               <input
                 className="field__input"
                 type="text"
@@ -62,9 +63,9 @@ export default function LoginPage() {
           </div>
 
           <div className="field">
-            <label className="field__label">Password</label>
+            <label className="field__label">PASSWORD</label>
             <div className="field__wrap">
-              <span className="field__icon">🔒</span>
+              <span className="field__icon"><IconLock size={18} /></span>
               <input
                 className="field__input"
                 type="password"
@@ -81,7 +82,12 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
           >
-            {loading ? <span className="spinner" /> : '🎟️  Login to Book'}
+            {loading ? <span className="spinner" /> : (
+              <>
+                <IconTicket size={20} />
+                <span>Login to Book</span>
+              </>
+            )}
           </button>
         </form>
 

@@ -26,6 +26,8 @@ function AdminRoute({ children }) {
   return children;
 }
 
+import { IconMovie } from './components/Icons';
+
 function Navbar() {
   const { currentUser, logout, selectedSeats, MAX_SEATS } = useStore();
   const navigate = useNavigate();
@@ -38,7 +40,10 @@ function Navbar() {
 
   return (
     <nav className="app-nav">
-      <Link to="/" className="app-nav__brand">🎬 BandhuShow</Link>
+      <Link to="/" className="app-nav__brand">
+        <IconMovie size={24} />
+        <span>BandhuShow</span>
+      </Link>
 
       <div className="app-nav__center">
       </div>
