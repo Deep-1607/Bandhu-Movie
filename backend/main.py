@@ -58,6 +58,8 @@ app.add_middleware(
 
 from fastapi.staticfiles import StaticFiles
 
+# Ensure uploads directory exists to prevent crash
+os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(seats.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
