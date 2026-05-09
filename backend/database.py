@@ -8,6 +8,12 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./cinema.db")
 
 # Fix for Render/Railway which often provides 'postgres://' URLs
+# Robust URL fixing
+if DATABASE_URL and "://" not in DATABASE_URL:
+    print("ERROR: DATABASE_URL is missing a protocol! (e.g., postgres://). Check your environment variables.")
+    # Fallback to a safe string to prevent parsing crash
+    DATABASE_URL = "sqlite+aiosqlite:///./fallback.db"
+
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgresql://") and "+asyncpg" not in DATABASE_URL:
