@@ -1,0 +1,43 @@
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+.timer--urgent {
+  background: #fef2f2;
+  border-color: #fecaca;
+  animation: timer-pulse 1s infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+.timer__icon { font-size: 18px; }
+
+.timer__label {
+  font-size: 14px;
+  color: var(--slate);
+  font-weight: 600;
+  flex: 1;
+}
+
+.timer__clock {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #ea580c;
+  letter-spacing: 2px;
+}
+
+.timer--urgent .timer__clock {
+  color: #dc2626;
+}

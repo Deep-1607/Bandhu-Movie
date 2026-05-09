@@ -1,0 +1,188 @@
+.login-page {
+  min-height: 100vh;
+  background: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated background blobs */
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: blob-move 8s ease-in-out infinite alternate;
+}
+.login-blob--1 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, var(--indigo), #8b5cf6);
+  top: -100px; left: -100px;
+}
+.login-blob--2 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, var(--green), #16a34a);
+  bottom: -80px; right: -80px;
+  animation-delay: -4s;
+}
+@keyframes blob-move {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, 20px) scale(1.1); }
+}
+
+/* Card */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  position: relative;
+  z-index: 1;
+  animation: card-in 0.4s ease;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Logo */
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.login-logo__icon { font-size: 32px; }
+.login-logo__text {
+  font-size: 1.6rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--green), #16a34a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-color);
+  text-align: center;
+  margin: 0 0 8px;
+}
+.login-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+/* Form */
+.login-form { display: flex; flex-direction: column; gap: 20px; }
+
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.field__wrap {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0 14px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.field__wrap:focus-within {
+  background: #ffffff;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+}
+.field__icon { font-size: 16px; margin-right: 10px; flex-shrink: 0; }
+.field__prefix {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 600;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+.field__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-color);
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  padding: 14px 0;
+}
+.field__input::placeholder { color: #94a3b8; }
+.field__input--phone { letter-spacing: 1px; }
+.field__wrap:has(.field__input--error) { border-color: #ef4444; }
+
+.field__error {
+  font-size: 12px;
+  color: #ef4444;
+  margin: 0;
+  padding-left: 4px;
+}
+
+/* Button */
+.login-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--green), #15803d);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s;
+  letter-spacing: 0.3px;
+  font-family: 'Inter', sans-serif;
+}
+.login-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #15803d, #166534);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(34,197,94,0.25);
+}
+.login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* Spinner */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.login-note {
+  font-size: 13px;
+  color: var(--slate);
+  text-align: center;
+  margin: 24px 0 0;
+}
+
+.login-note a {
+  color: var(--green);
+  text-decoration: none;
+  font-weight: 700;
+}

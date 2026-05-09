@@ -1,0 +1,68 @@
+.section {
+  margin-bottom: 36px;
+}
+
+.section__header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.section__price {
+  display: inline-block;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 20px;
+  padding: 2px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.section__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 4px 0 10px;
+  letter-spacing: 0.5px;
+}
+
+.section__divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+  margin: 0 auto;
+  width: 80%;
+}
+
+.section__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.row__label {
+  width: 18px;
+  font-size: 11px;
+  color: var(--slate);
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.seat-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.aisle {
+  width: 28px;
+  flex-shrink: 0;
+}
