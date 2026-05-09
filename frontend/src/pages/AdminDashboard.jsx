@@ -10,6 +10,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [seats, setSeats] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [previewImage, setPreviewImage] = useState(null);
   const currentUser = useStore((s) => s.currentUser);
 
   const fetchData = async () => {
@@ -104,14 +105,12 @@ export default function AdminDashboard() {
                 <div className="customer-name">👤 {seat.customer_name}</div>
                 <div className="customer-phone">📞 {seat.customer_phone}</div>
                 {seat.screenshot && (
-                  <a 
-                    href={seat.screenshot.startsWith('data:') ? seat.screenshot : `${BASE_URL}${seat.screenshot}`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="view-proof"
+                  <button 
+                    onClick={() => setPreviewImage(seat.screenshot.startsWith('data:') ? seat.screenshot : `${BASE_URL}${seat.screenshot}`)}
+                    className="view-proof-btn"
                   >
                     🖼️ View Payment
-                  </a>
+                  </button>
                 )}
               </div>
             )}
@@ -135,7 +134,15 @@ export default function AdminDashboard() {
             </div>
           </div>
         ))}
-      </div>
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div className="admin-modal" onClick={() => setPreviewImage(null)}>
+          <div className="admin-modal__content" onClick={e => e.stopPropagation()}>
+            <button className="admin-modal__close" onClick={() => setPreviewImage(null)}>×</button>
+            <img src={previewImage} alt="Payment Proof" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

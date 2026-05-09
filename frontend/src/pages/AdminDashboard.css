@@ -206,5 +206,61 @@
 .admin-seat__release:hover {
   background: #fee2e2;
   border-color: #fecaca;
-  color: #dc2626;
+}
+
+.view-proof-btn {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  color: var(--green);
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.view-proof-btn:hover { background: #f1f5f9; border-color: var(--green); }
+
+/* Modal */
+.admin-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.admin-modal__content {
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.admin-modal__close {
+  position: absolute;
+  top: -40px; right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.admin-modal__content img {
+  max-width: 100%;
+  max-height: calc(90vh - 20px);
+  display: block;
+  border-radius: 6px;
+  object-fit: contain;
 }
