@@ -81,7 +81,7 @@ async def select_seat(
         locked_until = datetime.now(IST) + timedelta(seconds=600)
         seat.status = "locked"
         seat.locked_by = req.session_id
-        seat.locked_until = locked_until
+        seat.locked_until = locked_until.replace(tzinfo=None)
 
     seat_lock_cache.acquire(seat_id, req.session_id)
 
