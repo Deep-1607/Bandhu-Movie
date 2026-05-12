@@ -13,6 +13,8 @@ export default function AdminDashboard() {
   const [seats, setSeats] = useState([]);
   const [filter, setFilter] = useState('all');
   const [previewImage, setPreviewImage] = useState(null);
+  const [rangeFrom, setRangeFrom] = useState('');
+  const [rangeTo, setRangeTo] = useState('');
   const currentUser = useStore((s) => s.currentUser);
   const showToast = useStore((s) => s.showToast);
 
@@ -180,7 +182,7 @@ export default function AdminDashboard() {
       doc.setFont('helvetica', 'normal');
       doc.text('Consolidated Tickets Export', pageWidth / 2, 115, { align: 'center' });
       doc.setFontSize(12);
-      doc.setTextColor(156, 163, 175);
+      doc.setTextColor(255, 255, 255);
       doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 130, { align: 'center' });
       doc.text(`Total Tickets: ${soldSeats.length}`, pageWidth / 2, 140, { align: 'center' });
 
@@ -213,11 +215,92 @@ export default function AdminDashboard() {
     }
   };
 
+  const generateRangeTicketsPDF = () => {
+    try {
+      const from = parseInt(rangeFrom);
+      const to = parseInt(rangeTo);
+
+      if (!from || !to || from > to) {
+        showToast('Please enter a valid range (e.g., 1 to 15).', 'error');
+        return;
+      }
+
+      const filtered = soldSeats.filter(s => s.receipt_no >= from && s.receipt_no <= to);
+      if (filtered.length === 0) {
+        showToast(`No sold tickets found in range #${from} to #${to}.`, 'warning');
+        return;
+      }
+
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Cover Page
+      doc.setFillColor(17, 24, 39);
+      doc.rect(0, 0, pageWidth, 297, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(32);
+      doc.setFont('helvetica', 'bold');
+      doc.text('BandhuShow', pageWidth / 2, 100, { align: 'center' });
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Tickets: #${from} to #${to}`, pageWidth / 2, 115, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 130, { align: 'center' });
+      doc.text(`Tickets in Range: ${filtered.length}`, pageWidth / 2, 140, { align: 'center' });
+
+      // Grouping
+      const groups = {};
+      for (const seat of filtered) {
+        const key = seat.receipt_no || 'N/A';
+        if (!groups[key]) {
+          groups[key] = {
+            receipt_no: seat.receipt_no,
+            customer_name: seat.customer_name,
+            customer_phone: seat.customer_phone,
+            booked_at: seat.booked_at,
+            seats: [],
+          };
+        }
+        groups[key].seats.push(seat);
+      }
+
+      const sortedGroups = Object.values(groups).sort((a, b) => (a.receipt_no || 0) - (b.receipt_no || 0));
+      for (let i = 0; i < sortedGroups.length; i++) {
+        generateTicket(doc, sortedGroups[i], i === 0);
+      }
+
+      doc.save(`BandhuShow_Tickets_${from}_to_${to}.pdf`);
+      showToast(`Downloaded ${filtered.length} tickets successfully!`, 'success');
+    } catch (error) {
+      console.error('Range PDF failed:', error);
+      showToast('Failed to generate range PDF.', 'error');
+    }
+  };
+
   return (
     <div className="admin">
       <header className="admin__header">
         <h1>🎬 BandhuShow Admin</h1>
         <div className="admin__header-actions">
+          <div className="admin__range-download">
+            <input 
+              type="number" 
+              placeholder="From #" 
+              value={rangeFrom} 
+              onChange={e => setRangeFrom(e.target.value)} 
+              className="range-input"
+            />
+            <input 
+              type="number" 
+              placeholder="To #" 
+              value={rangeTo} 
+              onChange={e => setRangeTo(e.target.value)} 
+              className="range-input"
+            />
+            <button className="admin__download-range" onClick={generateRangeTicketsPDF}>
+              Download Range
+            </button>
+          </div>
           <button 
             className="admin__download-all" 
             onClick={generateAllTicketsPDF} 
@@ -225,9 +308,9 @@ export default function AdminDashboard() {
             title={soldSeats.length > 0 ? `Download all ${soldSeats.length} sold tickets as one PDF` : "No sold tickets to download"}
             style={{ opacity: soldSeats.length === 0 ? 0.6 : 1, cursor: soldSeats.length === 0 ? 'not-allowed' : 'pointer' }}
           >
-            📥 Download All Tickets ({soldSeats.length})
+            📥 All ({soldSeats.length})
           </button>
-          <button className="admin__refresh" onClick={fetchData}>↻ Refresh</button>
+          <button className="admin__refresh" onClick={fetchData}>↻</button>
         </div>
       </header>
 

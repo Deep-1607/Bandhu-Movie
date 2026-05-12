@@ -61,6 +61,41 @@
   transform: translateY(-1px);
 }
 
+.admin__range-download {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.range-input {
+  width: 70px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+.range-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
+
+.admin__download-range {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.admin__download-range:hover { background: #1d4ed8; }
+
 /* Stats */
 .admin__stats {
   display: grid;
