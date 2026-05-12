@@ -44,34 +44,107 @@ export default function PaymentPage() {
   };
 
   const generatePDF = (confirmedSeats, finalTotal, rNo) => {
-    const doc = new jsPDF();
-    const formattedReceipt = String(rNo).padStart(3, '0');
-    
-    doc.setFontSize(22);
-    doc.text('BandhuShow - Booking Confirmation', 105, 20, { align: 'center' });
-    
-    doc.setFontSize(14);
-    doc.text(`Receipt No: #${formattedReceipt}`, 20, 35);
-    doc.text(`Customer: ${name}`, 20, 45);
-    doc.text(`Phone: ${phone}`, 20, 55);
-    doc.text(`Date: ${new Date().toLocaleString()}`, 20, 65);
-    
-    const tableData = confirmedSeats.map(s => [
-      `ROW ${s.row || 'A'} ${s.label}`,
-      s.section.replace('_', ' ').toUpperCase(),
-      `₹${s.price}`
-    ]);
-    
-    autoTable(doc, {
-      startY: 75,
-      head: [['Seat Details', 'Section', 'Price']],
-      body: tableData,
-    });
-    
-    doc.text(`Total Amount: ₹${finalTotal}`, 20, doc.lastAutoTable.finalY + 20);
-    doc.text('Enjoy your movie!', 105, doc.lastAutoTable.finalY + 40, { align: 'center' });
-    
-    doc.save(`BandhuShow_Ticket_${formattedReceipt}.pdf`);
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const formattedReceipt = String(rNo).padStart(3, '0');
+      const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+      // -- Background & Header --
+      doc.setFillColor(17, 24, 39); // Dark blue/gray
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('BandhuShow', pageWidth / 2, 18, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('OFFICIAL BOOKING TICKET', pageWidth / 2, 26, { align: 'center' });
+      doc.text('Dhabkaaro | Apple Multiplex, Maninagar', pageWidth / 2, 33, { align: 'center' });
+
+      // -- Ticket Body --
+      doc.setTextColor(30, 30, 30);
+      
+      // Receipt Info Box
+      doc.setFillColor(240, 253, 244); // Light green
+      doc.roundedRect(15, 50, 180, 20, 3, 3, 'F');
+      doc.setDrawColor(34, 197, 94); // Green border
+      doc.roundedRect(15, 50, 180, 20, 3, 3, 'D');
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(21, 128, 61);
+      doc.text(`RECEIPT NO: #${formattedReceipt}`, 25, 62);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`BOOKED ON: ${now}`, 185, 62, { align: 'right' });
+
+      // Movie Details Section
+      doc.setTextColor(30, 30, 30);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('MOVIE: DHABKAARO', 15, 85);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Date & Time: 12 May 2026, 8:45 PM', 15, 93);
+      doc.text('Venue: Apple Multiplex, Maninagar', 15, 99);
+
+      // Customer Details
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CUSTOMER DETAILS', 15, 115);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 60, 60);
+      doc.text(`Name: ${name}`, 15, 123);
+      doc.text(`Phone: +91 ${phone}`, 15, 129);
+
+      // Seats Table
+      const tableData = confirmedSeats.map(s => [
+        `ROW ${s.row || 'A'} - ${s.label}`,
+        s.section.replace('_', ' ').toUpperCase(),
+        `Rs. ${s.price}`
+      ]);
+
+      autoTable(doc, {
+        startY: 138,
+        head: [['Seat', 'Section', 'Price']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [17, 24, 39], textColor: 255 },
+        styles: { fontSize: 10, cellPadding: 4 },
+        columnStyles: {
+          2: { halign: 'right' }
+        },
+        foot: [['', 'TOTAL AMOUNT', `Rs. ${finalTotal}`]],
+        footStyles: { fillColor: [240, 240, 240], textColor: [30, 30, 30], fontStyle: 'bold', halign: 'right' }
+      });
+
+      // Footer Note
+      const finalY = doc.lastAutoTable.finalY + 20;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Thank you for booking with BandhuShow. Please carry a digital copy of this ticket.', pageWidth / 2, finalY, { align: 'center' });
+      doc.text('Enjoy your show!', pageWidth / 2, finalY + 8, { align: 'center' });
+
+      // Decorative dashed line
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineDashPattern([2, 2], 0);
+      doc.line(15, finalY + 15, pageWidth - 15, finalY + 15);
+      doc.setLineDashPattern([], 0);
+
+      doc.save(`BandhuShow_Ticket_${formattedReceipt}.pdf`);
+    } catch (err) {
+      console.error("PDF generation error:", err);
+      showToast("Could not generate PDF. Please screenshot this page.", "error");
+    }
   };
 
   const handleManualSubmit = async (e) => {
@@ -112,13 +185,11 @@ export default function PaymentPage() {
       clearSelected();
       setSuccess(true);
       
-      // Auto-generate PDF (wrapped to avoid crashing the success screen)
-      try {
+      // Auto-generate PDF
+      setTimeout(() => {
         generatePDF(seatsToConfirm, finalTotal, rNo);
-      } catch (pdfErr) {
-        console.error("PDF Generation failed:", pdfErr);
-        showToast("Booking successful, but PDF generation failed. Try downloading manually.", "warning");
-      }
+      }, 500);
+
     } catch (err) {
       showToast(err.response?.data?.detail || 'Booking failed. Try again.', 'error');
     } finally {
@@ -141,13 +212,7 @@ export default function PaymentPage() {
           </div>
 
           <div className="success-actions">
-            <button className="pdf-btn" onClick={() => {
-              try {
-                generatePDF(bookedSeats, bookedTotal, receiptNo);
-              } catch (e) {
-                showToast("PDF generation failed. Please contact support.", "error");
-              }
-            }}>
+            <button className="pdf-btn" onClick={() => generatePDF(bookedSeats, bookedTotal, receiptNo)}>
               📄 Download PDF Ticket
             </button>
             <button className="home-btn" onClick={() => navigate('/')}>

@@ -34,6 +34,33 @@
 }
 .admin__refresh:hover { background: #dbeafe; }
 
+.admin__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin__download-all {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border: none;
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+  letter-spacing: 0.2px;
+}
+.admin__download-all:hover {
+  background: linear-gradient(135deg, #15803d, #166534);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.45);
+  transform: translateY(-1px);
+}
+
 /* Stats */
 .admin__stats {
   display: grid;
@@ -209,12 +236,9 @@
 }
 
 .view-proof-btn {
-  display: block;
-  width: 100%;
-  margin-top: 8px;
   background: #f8fafc;
   border: 1px solid var(--border-color);
-  color: var(--green);
+  color: #15803d;
   padding: 6px;
   border-radius: 6px;
   font-size: 11px;
@@ -223,7 +247,28 @@
   transition: all 0.2s;
   font-family: 'Inter', sans-serif;
 }
-.view-proof-btn:hover { background: #f1f5f9; border-color: var(--green); }
+.view-proof-btn:hover { background: #f1f5f9; border-color: #15803d; }
+
+.download-ticket-btn {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.download-ticket-btn:hover { background: #dbeafe; border-color: #3b82f6; }
+
+.admin-seat__customer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
 
 /* Modal */
 .admin-modal {

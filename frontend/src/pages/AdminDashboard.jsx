@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import useStore from '../store/useStore';
 import './AdminDashboard.css';
 
@@ -12,6 +14,7 @@ export default function AdminDashboard() {
   const [filter, setFilter] = useState('all');
   const [previewImage, setPreviewImage] = useState(null);
   const currentUser = useStore((s) => s.currentUser);
+  const showToast = useStore((s) => s.showToast);
 
   const fetchData = async () => {
     try {
@@ -49,12 +52,183 @@ export default function AdminDashboard() {
   };
 
   const filteredSeats = filter === 'all' ? seats : seats.filter((s) => s.status === filter);
+  const soldSeats = seats.filter((s) => s.status === 'sold');
+
+  // --- Premium Ticket Generation Logic ---
+  const generateTicket = (doc, grp, isFirstPage = true) => {
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const formattedReceipt = String(grp.receipt_no || '0').padStart(3, '0');
+    const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+    if (!isFirstPage) doc.addPage();
+
+    // -- Header --
+    doc.setFillColor(17, 24, 39);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BandhuShow', pageWidth / 2, 18, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('OFFICIAL BOOKING TICKET', pageWidth / 2, 26, { align: 'center' });
+    doc.text('Dhabkaaro | Apple Multiplex, Maninagar', pageWidth / 2, 33, { align: 'center' });
+
+    // -- Receipt Info Box --
+    doc.setFillColor(240, 253, 244);
+    doc.roundedRect(15, 50, 180, 20, 3, 3, 'F');
+    doc.setDrawColor(34, 197, 94);
+    doc.roundedRect(15, 50, 180, 20, 3, 3, 'D');
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(21, 128, 61);
+    doc.text(`RECEIPT NO: #${formattedReceipt}`, 25, 62);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`BOOKED ON: ${grp.booked_at ? new Date(grp.booked_at).toLocaleString() : now}`, 185, 62, { align: 'right' });
+
+    // -- Details --
+    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MOVIE: DHABKAARO', 15, 85);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Date & Time: 12 May 2026, 8:45 PM', 15, 93);
+    doc.text('Venue: Apple Multiplex, Maninagar', 15, 99);
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CUSTOMER DETAILS', 15, 115);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Name: ${grp.customer_name || '—'}`, 15, 123);
+    doc.text(`Phone: ${grp.customer_phone || '—'}`, 15, 129);
+
+    // -- Table --
+    const tableData = grp.seats.map(s => [
+      `ROW ${s.row || 'A'} - ${s.label}`,
+      s.section.replace('_', ' ').toUpperCase(),
+      `Rs. ${s.price}`
+    ]);
+    const finalTotal = grp.seats.reduce((sum, s) => sum + s.price, 0);
+
+    autoTable(doc, {
+      startY: 138,
+      head: [['Seat', 'Section', 'Price']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [17, 24, 39], textColor: 255 },
+      styles: { fontSize: 10, cellPadding: 4 },
+      columnStyles: { 2: { halign: 'right' } },
+      foot: [['', 'TOTAL AMOUNT', `Rs. ${finalTotal}`]],
+      footStyles: { fillColor: [240, 240, 240], textColor: [30, 30, 30], fontStyle: 'bold', halign: 'right' }
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 20;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(100, 100, 100);
+    doc.text('Thank you for booking with BandhuShow. Enjoy the show!', pageWidth / 2, finalY, { align: 'center' });
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineDashPattern([2, 2], 0);
+    doc.line(15, finalY + 10, pageWidth - 15, finalY + 10);
+    doc.setLineDashPattern([], 0);
+  };
+
+  const handleDownloadSingle = (receiptNo) => {
+    try {
+      const groupSeats = seats.filter(s => s.receipt_no === receiptNo);
+      if (groupSeats.length === 0) return;
+
+      const doc = new jsPDF();
+      const grp = {
+        receipt_no: receiptNo,
+        customer_name: groupSeats[0].customer_name,
+        customer_phone: groupSeats[0].customer_phone,
+        booked_at: groupSeats[0].booked_at,
+        seats: groupSeats
+      };
+
+      generateTicket(doc, grp, true);
+      doc.save(`Ticket_#${String(receiptNo).padStart(3, '0')}.pdf`);
+    } catch (err) {
+      console.error(err);
+      showToast("Download failed", "error");
+    }
+  };
+
+  const generateAllTicketsPDF = () => {
+    try {
+      if (soldSeats.length === 0) {
+        showToast('No sold tickets to download.', 'warning');
+        return;
+      }
+
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Cover Page
+      doc.setFillColor(17, 24, 39);
+      doc.rect(0, 0, pageWidth, 297, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(32);
+      doc.setFont('helvetica', 'bold');
+      doc.text('BandhuShow', pageWidth / 2, 100, { align: 'center' });
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Consolidated Tickets Export', pageWidth / 2, 115, { align: 'center' });
+      doc.setFontSize(12);
+      doc.setTextColor(156, 163, 175);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 130, { align: 'center' });
+      doc.text(`Total Tickets: ${soldSeats.length}`, pageWidth / 2, 140, { align: 'center' });
+
+      // Grouping
+      const groups = {};
+      for (const seat of soldSeats) {
+        const key = seat.receipt_no || 'N/A';
+        if (!groups[key]) {
+          groups[key] = {
+            receipt_no: seat.receipt_no,
+            customer_name: seat.customer_name,
+            customer_phone: seat.customer_phone,
+            booked_at: seat.booked_at,
+            seats: [],
+          };
+        }
+        groups[key].seats.push(seat);
+      }
+
+      const sortedGroups = Object.values(groups).sort((a, b) => (a.receipt_no || 0) - (b.receipt_no || 0));
+
+      for (let i = 0; i < sortedGroups.length; i++) {
+        generateTicket(doc, sortedGroups[i], i === 0);
+      }
+
+      doc.save(`BandhuShow_All_Tickets_${Date.now()}.pdf`);
+    } catch (error) {
+      console.error('PDF Generation failed:', error);
+      showToast('Failed to generate PDF.', 'error');
+    }
+  };
 
   return (
     <div className="admin">
       <header className="admin__header">
         <h1>🎬 BandhuShow Admin</h1>
-        <button className="admin__refresh" onClick={fetchData}>↻ Refresh</button>
+        <div className="admin__header-actions">
+          <button 
+            className="admin__download-all" 
+            onClick={generateAllTicketsPDF} 
+            disabled={soldSeats.length === 0}
+            title={soldSeats.length > 0 ? `Download all ${soldSeats.length} sold tickets as one PDF` : "No sold tickets to download"}
+            style={{ opacity: soldSeats.length === 0 ? 0.6 : 1, cursor: soldSeats.length === 0 ? 'not-allowed' : 'pointer' }}
+          >
+            📥 Download All Tickets ({soldSeats.length})
+          </button>
+          <button className="admin__refresh" onClick={fetchData}>↻ Refresh</button>
+        </div>
       </header>
 
       {/* Stats Cards */}
@@ -104,14 +278,23 @@ export default function AdminDashboard() {
                 <div className="receipt-no">🎟️ Receipt: #{String(seat.receipt_no).padStart(3, '0')}</div>
                 <div className="customer-name">👤 {seat.customer_name}</div>
                 <div className="customer-phone">📞 {seat.customer_phone}</div>
-                {seat.screenshot && (
+                
+                <div className="admin-seat__customer-actions">
+                  {seat.screenshot && (
+                    <button 
+                      onClick={() => setPreviewImage(seat.screenshot.startsWith('data:') ? seat.screenshot : `${BASE_URL}${seat.screenshot}`)}
+                      className="view-proof-btn"
+                    >
+                      🖼️ View Proof
+                    </button>
+                  )}
                   <button 
-                    onClick={() => setPreviewImage(seat.screenshot.startsWith('data:') ? seat.screenshot : `${BASE_URL}${seat.screenshot}`)}
-                    className="view-proof-btn"
+                    onClick={() => handleDownloadSingle(seat.receipt_no)}
+                    className="download-ticket-btn"
                   >
-                    🖼️ View Payment
+                    📄 Download Ticket
                   </button>
-                )}
+                </div>
               </div>
             )}
 
@@ -134,6 +317,8 @@ export default function AdminDashboard() {
             </div>
           </div>
         ))}
+      </div>
+
       {/* Image Preview Modal */}
       {previewImage && (
         <div className="admin-modal" onClick={() => setPreviewImage(null)}>
